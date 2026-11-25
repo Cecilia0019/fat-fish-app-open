@@ -1,0 +1,14 @@
+{
+  "name": "fat-fish-app-open",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "大肥鱼 App 开源版：QQ 风格聊天界面 + 本地网关 + 可选的 SurfCore/DSH 桥接",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "start:lan": "node server.mjs --lan"
+  }
+}

@@ -1,0 +1,6 @@
+data/
+bin/*
+!bin/README.md
+dist/
+node_modules/
+*.log

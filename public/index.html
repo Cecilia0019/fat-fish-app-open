@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="qq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f2f4f7" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="大肥鱼" />
+  <title>大肥鱼 · 手机端</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- 登录 / 配对 -->
+  <section id="login" class="login-screen hidden" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <div class="brand">
+        <img src="/fish-cover.png" alt="" width="56" height="56" />
+        <div>
+          <h1 id="loginTitle">大肥鱼 · 手机端</h1>
+          <p>同一个她，换一扇门。</p>
+        </div>
+      </div>
+      <label class="field">
+        <span>访问令牌</span>
+        <input id="tokenInput" type="password" inputmode="text" autocomplete="off"
+               spellcheck="false" placeholder="在电脑的 data/token.txt 里" />
+      </label>
+      <button id="loginBtn" class="primary" type="button">进入</button>
+      <p id="loginError" class="login-error" role="alert"></p>
+      <p class="login-hint">
+        令牌只存在这台手机上。第一次用电脑打开时，地址栏里的 <code>?token=</code> 就是它。
+      </p>
+    </div>
+  </section>
+
+  <!-- 聊天 -->
+  <section id="chat" class="app hidden">
+    <header class="topbar">
+      <button id="backBtn" class="icon-btn back-btn" type="button" aria-label="侧边栏">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="who">
+        <span class="avatar" aria-hidden="true">
+          <img id="fishAvatarImg" src="/fish-avatar.png" alt="" />
+          <i id="presenceDot" class="dot"></i>
+        </span>
+        <div class="who-text">
+          <strong id="fishName">大肥鱼</strong>
+          <span id="statusText">连接中…</span>
+        </div>
+      </div>
+      <button id="infoBtn" class="icon-btn" type="button" aria-label="设置">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+          <circle cx="19" cy="12" r="1.2" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+    </header>
+
+    <main id="messages" class="messages" aria-live="polite"></main>
+
+    <div id="typing" class="typing hidden" aria-hidden="true">
+      <span class="typing-avatar"><img id="typingAvatar" src="/fish-avatar.png" alt="" /></span>
+      <span class="bubble typing-bubble"><i></i><i></i><i></i></span>
+      <span class="typing-label" id="typingLabel">她在想…</span>
+    </div>
+
+    <div id="errorBar" class="error-bar hidden" role="alert">
+      <span id="errorText"></span>
+      <button id="errorRetry" type="button">重试</button>
+      <button id="errorClose" type="button" aria-label="关闭">×</button>
+    </div>
+
+    <div id="pendingPreview" class="pending-preview hidden">
+      <img id="pendingImage" alt="" />
+      <div class="pending-meta">
+        <strong id="pendingTitle">图片</strong>
+        <span id="pendingStatus">已就绪</span>
+      </div>
+      <button id="pendingRemove" class="pending-remove" type="button" aria-label="移除图片">×</button>
+    </div>
+
+    <div id="stickerPanel" class="sticker-panel hidden">
+      <div class="sticker-head">
+        <strong>表情</strong>
+        <div class="sticker-head-actions">
+          <button id="stickerManage" type="button">管理</button>
+          <button id="stickerClose" type="button" aria-label="关闭表情">×</button>
+        </div>
+      </div>
+      <div id="stickerGrid" class="sticker-grid"></div>
+    </div>
+
+    <footer class="composer">
+      <button id="attachBtn" class="tool-btn" type="button" aria-label="发送图片">
+        <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v8M8 12h8" stroke-linecap="round" />
+        </svg>
+      </button>
+      <textarea id="input" rows="1" maxlength="2000" placeholder="发消息…"
+                enterkeyhint="send" aria-label="消息"></textarea>
+      <button id="stickerBtn" class="tool-btn" type="button" aria-label="表情">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7">
+          <circle cx="12" cy="12" r="8.5" />
+          <circle cx="9" cy="10" r=".9" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="10" r=".9" fill="currentColor" stroke="none" />
+          <path d="M8.5 14c1 1.5 2.2 2.2 3.5 2.2s2.5-.7 3.5-2.2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <button id="voiceInputBtn" class="tool-btn" type="button" aria-label="语音输入">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7">
+          <rect x="9" y="3.5" width="6" height="11" rx="3" />
+          <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7" stroke-linecap="round" />
+        </svg>
+      </button>
+      <button id="sendBtn" class="send-btn" type="button" aria-label="发送" disabled>发送</button>
+    </footer>
+    <input id="fileInput" type="file" accept="image/*" hidden />
+  </section>
+
+  <!-- 侧边栏（QQ 风格） -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop hidden"></div>
+  <aside id="sidebar" class="sidebar hidden" aria-label="侧边栏">
+    <div class="sidebar-cover">
+      <img src="/fish-cover.png" alt="" />
+      <div class="sidebar-cover-fade"></div>
+    </div>
+    <div class="sidebar-user">
+      <img id="sidebarAvatar" src="/fish-avatar.png" alt="" />
+      <div>
+        <strong>大肥鱼</strong>
+        <span>在线 · 会记得你</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button id="sidebarHome" type="button"><span>🏠</span>她的主页</button>
+      <button id="sidebarMe" type="button"><span>👤</span>我的主页</button>
+      <button id="sidebarHistory" type="button"><span>🕘</span>聊天记录</button>
+      <button id="sidebarLibrary" type="button"><span>🎨</span>表情与图片库</button>
+      <button id="sidebarBackground" type="button"><span>🖼️</span>聊天背景</button>
+      <button id="sidebarTheme" type="button"><span>🌗</span>切换主题</button>
+      <button id="sidebarSettings" type="button"><span>⚙️</span>设置</button>
+      <button id="sidebarAbout" type="button"><span>🐟</span>关于大肥鱼</button>
+    </nav>
+    <div class="sidebar-footer">
+      <span>FatFish App</span>
+      <span>z0.1.0</span>
+    </div>
+  </aside>
+
+  <!-- 她的主页 -->
+  <section id="fishHome" class="fish-home hidden" aria-label="她的主页">
+    <header class="fish-home-bar">
+      <button id="fishHomeBack" class="icon-btn" type="button" aria-label="返回">‹</button>
+      <strong>她的主页</strong>
+      <button id="fishHomeMore" class="icon-btn" type="button" aria-label="设置">⋯</button>
+    </header>
+    <div class="fish-home-scroll">
+      <div class="fish-cover">
+        <img src="/fish-cover.png" alt="" />
+        <div class="fish-cover-fade"></div>
+      </div>
+      <div class="fish-head">
+        <img id="fishHomeAvatar" src="/fish-avatar.png" alt="" />
+        <div>
+          <h1 id="fishHomeName">大肥鱼</h1>
+          <p>在线 · 她记得你们的事</p>
+        </div>
+      </div>
+      <p id="fishSignature" class="fish-signature">今天也在好好过日子。</p>
+
+      <div class="fish-stats">
+        <div class="fish-stat">
+          <span>DeepSeek 余额</span>
+          <strong id="fishBalance">—</strong>
+        </div>
+        <div class="fish-stat">
+          <span>今天花费</span>
+          <strong id="fishToday">—</strong>
+        </div>
+        <div class="fish-stat">
+          <span>近 7 天</span>
+          <strong id="fish7d">—</strong>
+        </div>
+      </div>
+
+      <div class="fish-card">
+        <div class="fish-card-title">
+          <span>每天花费</span>
+          <b id="fishMonthCost">—</b>
+        </div>
+        <div id="fishChart" class="fish-chart"></div>
+        <div id="fishChartLabels" class="fish-chart-labels"></div>
+      </div>
+
+      <div class="fish-meta">
+        <div><span>累计花费</span><b id="fishTotalCost">—</b></div>
+        <div><span>数据来源</span><b>DeepSeek 平台</b></div>
+        <div><span>更新时间</span><b id="fishUpdated">—</b></div>
+      </div>
+      <div id="fishError" class="fish-error hidden"></div>
+      <button id="fishRefresh" class="ghost fish-refresh" type="button">刷新余额与花费</button>
+      <p class="fish-note">余额和账单来自 DeepSeek 平台；角色与记忆仍在你电脑上的 SurfCore。</p>
+    </div>
+  </section>
+  <!-- 聊天记录 -->
+  <section id="historyHome" class="subpage hidden" aria-label="聊天记录">
+    <header class="subpage-bar">
+      <button id="historyBack" class="icon-btn" type="button" aria-label="返回">‹</button>
+      <strong>聊天记录</strong>
+      <span id="historyCount" class="subpage-count"></span>
+    </header>
+    <div class="history-search">
+      <input id="historySearch" type="search" placeholder="搜一句以前说过的话…" />
+      <button id="historySearchBtn" type="button">搜索</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+    <button id="historyMore" class="ghost history-more" type="button">加载更早</button>
+  </section>
+
+  <!-- 我的主页 -->
+  <section id="meHome" class="subpage hidden" aria-label="我的主页">
+    <header class="subpage-bar">
+      <button id="meBack" class="icon-btn" type="button" aria-label="返回">‹</button>
+      <strong>我的主页</strong>
+      <button id="meSettings" class="icon-btn" type="button" aria-label="设置">⋯</button>
+    </header>
+    <div class="subpage-scroll">
+      <div class="me-head">
+        <img id="meAvatar" src="/default-user.svg" alt="" />
+        <div class="me-head-info">
+          <h1 id="meName">我</h1>
+          <p>在 App 里的你</p>
+        </div>
+        <button id="meAvatarBtn" class="ghost small" type="button">换头像</button>
+      </div>
+      <div class="me-name-edit">
+        <input id="meNameInput" maxlength="20" placeholder="给自己起个名字" />
+        <button id="meNameSave" class="ghost small" type="button">保存</button>
+      </div>
+      <div class="library-card">
+        <div class="fish-card-title">
+          <span>我的表情</span>
+          <button id="meStickerUpload" class="ghost small" type="button">＋ 添加</button>
+        </div>
+        <div id="meStickerGrid" class="library-grid compact"></div>
+        <p class="setting-hint">添加的表情会出现在聊天表情面板，也会存进电脑的 data/library。</p>
+      </div>
+      <p class="fish-note">头像、昵称、表情都存在电脑上；换手机不会丢。</p>
+    </div>
+  </section>
+
+  <!-- 表情与图片库 -->
+  <section id="libraryHome" class="subpage hidden" aria-label="表情与图片库">
+    <header class="subpage-bar">
+      <button id="libraryBack" class="icon-btn" type="button" aria-label="返回">‹</button>
+      <strong>表情与图片库</strong>
+      <button id="libraryUploadBtn" class="icon-btn" type="button" aria-label="上传">＋</button>
+    </header>
+    <div class="library-tools">
+      <div id="libraryTabs" class="segmented">
+        <button type="button" data-kind="sticker">表情</button>
+        <button type="button" data-kind="image">图片</button>
+      </div>
+      <button id="libraryAsk" class="ghost small" type="button">让她联网找</button>
+    </div>
+    <div id="libraryGrid" class="library-grid"></div>
+    <div class="library-import">
+      <input id="libraryUrl" type="url" placeholder="粘贴图片直链，收藏进库" />
+      <button id="libraryImport" type="button">收藏</button>
+    </div>
+    <p id="libraryNote" class="fish-note">存在电脑的 data/library；手机端负责浏览、上传和收藏。</p>
+  </section>
+
+  <div id="lightbox" class="lightbox hidden" role="dialog" aria-label="查看图片">
+    <button id="lightboxClose" class="lightbox-close" type="button" aria-label="关闭">×</button>
+    <img id="lightboxImg" alt="" />
+  </div>
+
+  <!-- 设置 -->
+  <div id="sheetBackdrop" class="sheet-backdrop hidden"></div>
+  <aside id="sheet" class="sheet hidden" aria-label="设置">
+    <div class="sheet-grip"></div>
+    <h2>设置</h2>
+
+    <div class="profile-row">
+      <img id="userAvatarPreview" class="profile-avatar" src="/default-user.svg" alt="" />
+      <div class="profile-info">
+        <strong>我的头像</strong>
+        <span>聊天里右边显示</span>
+      </div>
+      <button id="userAvatarBtn" class="ghost small" type="button">更换</button>
+    </div>
+
+    <div class="profile-row">
+      <img id="fishAvatarPreview" class="profile-avatar" src="/icon.svg" alt="" />
+      <div class="profile-info">
+        <strong>她的头像</strong>
+        <span>顶栏和左边显示</span>
+      </div>
+      <button id="fishAvatarBtn" class="ghost small" type="button">更换</button>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-title">聊天背景</div>
+      <div id="bgPresets" class="bg-presets">
+        <button type="button" data-bg="preset:sky"><i class="bg-sky"></i><span>浅蓝</span></button>
+        <button type="button" data-bg="preset:whale"><i class="bg-whale"></i><span>鲸鱼</span></button>
+        <button type="button" data-bg="preset:paper"><i class="bg-paper"></i><span>纸张</span></button>
+        <button type="button" data-bg="preset:night"><i class="bg-night"></i><span>夜色</span></button>
+      </div>
+      <button id="bgUploadBtn" class="ghost small" type="button">上传背景图片</button>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-title">主题</div>
+      <div id="themeSeg" class="segmented">
+        <button type="button" data-theme="qq">QQ 白</button>
+        <button type="button" data-theme="dark">深夜</button>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-title">语音</div>
+      <label class="voice-row">
+        <input id="voiceToggle" type="checkbox" />
+        <span>她回复后自动朗读</span>
+      </label>
+      <p class="setting-hint">使用电脑上的中文语音（Windows Huihui）生成，第一次会慢一两秒。</p>
+    </div>
+
+    <dl class="info-list">
+      <div><dt>版本</dt><dd id="infoVersion">—</dd></div>
+      <div><dt>桥接</dt><dd id="infoBridge">—</dd></div>
+      <div><dt>跨网络</dt><dd id="infoRemote">—</dd></div>
+      <div><dt>令牌</dt><dd id="infoToken">—</dd></div>
+      <div><dt>消息</dt><dd id="infoCount">—</dd></div>
+    </dl>
+    <div class="sheet-actions">
+      <button id="changeServerBtn" class="ghost" type="button">更换服务器地址</button>
+      <button id="reconnectBtn" class="ghost" type="button">重新连接</button>
+      <button id="forgetBtn" class="ghost danger" type="button">清除这台手机的令牌</button>
+    </div>
+    <p class="sheet-note">
+      头像和背景存在你电脑上。她的人格、记忆都在那边；换手机不会丢。
+    </p>
+  </aside>
+
+  <input id="avatarFileInput" type="file" accept="image/*" hidden />
+  <input id="bgFileInput" type="file" accept="image/*" hidden />
+  <input id="stickerFileInput" type="file" accept="image/*" hidden />
+
+  <div id="messageMenuBackdrop" class="menu-backdrop hidden"></div>
+  <div id="messageMenu" class="message-menu hidden" role="menu">
+    <button type="button" data-action="copy">复制</button>
+    <button type="button" data-action="retry">重发</button>
+    <button type="button" data-action="delete">删除</button>
+    <button type="button" data-action="cancel">取消</button>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="/app.js" type="module"></script>
+  <noscript>这个页面需要 JavaScript。</noscript>
+</body>
+</html>

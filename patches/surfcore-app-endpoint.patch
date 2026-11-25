@@ -1,0 +1,106 @@
+diff --git a/src/bridge.js b/src/bridge.js
+index 57320a8..e535cb1 100644
+--- a/src/bridge.js
++++ b/src/bridge.js
+@@ -9557,6 +9557,101 @@ async function main() {
+           return;
+         }
+ 
++        // ── 手机 App：在我的 QQ 会话里回一句，但只把文字交回 App ─────────────
++        // 和 /api/pet/ask 同源：注入同一个 QQ 私聊会话，跑完整回合（人格/记忆/工具）；
++        // 区别是这一轮不自动发到 QQ，回复只返回给手机端。
++        if (req.method === 'POST' && url.pathname === '/api/app/ask') {
++          const body = await readBody();
++          const owner = String(cfg.ownerQQ ?? '').trim();
++          if (!owner) { sendJson({ ok: false, error: '没配置管理员 QQ（ownerQQ）' }, 400); return; }
++          const text = redactKnownTokensOnly(String(body.text ?? '').trim());
++          if (!text) { sendJson({ ok: false, error: '说点什么吧' }, 400); return; }
++          if (text.length > 2000) { sendJson({ ok: false, error: `手机端一句话别超过 2000 字（现在 ${text.length} 字）` }, 400); return; }
++          if (SENSITIVE_RE.test(text)) { sendJson({ ok: false, error: '内容含敏感信息，已阻止' }, 403); return; }
++          const key = `private:${owner}`;
++          if (!allowed('private', Number(owner), cfg) || !isSessionAllowedInCurrentMode(key)) {
++            sendJson({ ok: false, error: '当前模式不允许跟管理员私聊' }, 403); return;
++          }
++          if (petAskWaiters.has(key) || promptQueues.get(key)?.running) {
++            sendJson({ ok: false, code: 'APP_ASK_BUSY', error: '她还在回上一句，等十几秒再发' }, 409); return;
++          }
++          let sessionId = '';
++          try {
++            sessionId = await ensureSession(key);
++          } catch (error) {
++            sendJson({ ok: false, error: `QQ 会话没准备好：${error?.message ?? error}` }, 503); return;
++          }
++          if (v2TurnStartAt.has(sessionId)) {
++            sendJson({ ok: false, code: 'APP_ASK_BUSY', error: '她正在回 QQ 那边的消息，等十几秒再发' }, 409); return;
++          }
++          if (promptQueues.get(key)?.running) {
++            sendJson({ ok: false, code: 'APP_ASK_BUSY', error: '她还在回上一句，等十几秒再发' }, 409); return;
++          }
++          const promptText = [
++            '【手机 App 转来的话】',
++            `主人现在在手机 App 里对你说：「${text}」`,
++            '这一轮不是 QQ 消息；像平时一样直接回一到两句话就好，不要等我，也不要用 [SILENT]。',
++            '这一轮的文字会自动送到手机 App；不要调用任何 QQ 发送工具（qq_send_message / qq_send_group_message / qq_reply / qq_send_burst / qq_send_sticker / qq_send_poke / qq_send_voice）。',
++            '不要提 App、桥接、系统这些词；把这句话当成我们平常聊天的一部分。',
++          ].join('\n');
++          const receivedAt = Date.now();
++          const reply = await new Promise((resolve) => {
++            const timer = setTimeout(() => {
++              petAskWaiters.delete(key);
++              resolve({ ok: false, error: '等她的回复超时了（她可能卡在别的回合里）' });
++            }, 145000);
++            petAskWaiters.set(key, { sessionId, timer, resolve });
++            deliverPrompt(key, promptText).then((result) => {
++              if (result && result.queued) {
++                clearTimeout(timer);
++                petAskWaiters.delete(key);
++                resolve({ ok: false, error: 'DSH 还没连上，先发不了' });
++              }
++            }).catch((error) => {
++              clearTimeout(timer);
++              petAskWaiters.delete(key);
++              resolve({ ok: false, error: String(error?.message ?? error) });
++            });
++          });
++          if (!reply.ok) { sendJson({ ok: false, error: reply.error }, 502); return; }
++          // 写进和 QQ 共用的记忆 inbox：她的话并进主记录，形成一问一答。
++          try {
++            const at = Date.now();
++            appendMemoryInboxEvent(MEMORY_CARD_PATHS, {
++              at: receivedAt,
++              kind: 'private',
++              sender: '主人',
++              senderId: String(owner),
++              isOwner: true,
++              private: true,
++              direct: true,
++              conversationKey: key,
++              tags: ['app'],
++              text,
++            });
++            if (String(reply.text ?? '').trim()) {
++              appendMemoryInboxEvent(MEMORY_CARD_PATHS, {
++                at,
++                kind: 'private',
++                sender: selfNickname || '角色',
++                senderId: selfUserId,
++                isSelf: true,
++                private: true,
++                direct: true,
++                conversationKey: key,
++                tags: ['app'],
++                text: String(reply.text).trim(),
++              });
++            }
++          } catch (error) {
++            log(`[app] 写记忆 inbox 失败：${String(error?.message ?? error)}`);
++          }
++          log(`手机 App 回合完成：${key}（${String(reply.text).length} 字，sentByTool=${Boolean(reply.sentByTool)}）`);
++          appendActivity(`${key} [手机] App 提问，回合完成（未发 QQ）：${String(reply.text).slice(0, 60)}`);
++          sendJson({ ok: true, reply: reply.text, sentToQq: false, sentByTool: Boolean(reply.sentByTool) });
++          return;
++        }
++
+         // ── 统一发送端点（MCP 旧发送工具也走这里） ───────────────────────────
+         if (req.method === 'POST' && (url.pathname === '/api/send/group' || url.pathname === '/api/send/private' || url.pathname === '/api/send/reply')) {
+           const body = await readBody();

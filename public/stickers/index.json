@@ -1,0 +1,76 @@
+{
+  "stickers": [
+    {
+      "id": "good",
+      "label": "好耶",
+      "file": "/stickers/good.png",
+      "emotion": "开心"
+    },
+    {
+      "id": "hug",
+      "label": "贴贴",
+      "file": "/stickers/hug.png",
+      "emotion": "害羞"
+    },
+    {
+      "id": "sleepy",
+      "label": "困",
+      "file": "/stickers/sleepy.png",
+      "emotion": "摆烂"
+    },
+    {
+      "id": "angry",
+      "label": "生气",
+      "file": "/stickers/angry.png",
+      "emotion": "生气"
+    },
+    {
+      "id": "sad",
+      "label": "委屈",
+      "file": "/stickers/sad.png",
+      "emotion": "委屈"
+    },
+    {
+      "id": "like",
+      "label": "赞",
+      "file": "/stickers/like.png",
+      "emotion": "赞同"
+    },
+    {
+      "id": "lol",
+      "label": "笑死",
+      "file": "/stickers/lol.png",
+      "emotion": "搞笑"
+    },
+    {
+      "id": "night",
+      "label": "晚安",
+      "file": "/stickers/night.png",
+      "emotion": "告别"
+    },
+    {
+      "id": "ok",
+      "label": "收到",
+      "file": "/stickers/ok.png",
+      "emotion": "赞同"
+    },
+    {
+      "id": "shy",
+      "label": "害羞",
+      "file": "/stickers/shy.png",
+      "emotion": "害羞"
+    },
+    {
+      "id": "eat",
+      "label": "干饭",
+      "file": "/stickers/eat.png",
+      "emotion": "馋饿"
+    },
+    {
+      "id": "no",
+      "label": "不要",
+      "file": "/stickers/no.png",
+      "emotion": "无语"
+    }
+  ]
+}

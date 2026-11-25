@@ -1,0 +1,75 @@
+diff --git a/src/bridge.js b/src/bridge.js
+index e535cb1..27b75c2 100644
+--- a/src/bridge.js
++++ b/src/bridge.js
+@@ -9564,7 +9564,24 @@ async function main() {
+           const body = await readBody();
+           const owner = String(cfg.ownerQQ ?? '').trim();
+           if (!owner) { sendJson({ ok: false, error: '没配置管理员 QQ（ownerQQ）' }, 400); return; }
+-          const text = redactKnownTokensOnly(String(body.text ?? '').trim());
++          let imageParts = [];
++          let imageNote = '';
++          if (body.image && typeof body.image === 'object') {
++            const raw = String(body.image.data ?? '').replace(/^data:[^;]+;base64,/, '');
++            const buf = Buffer.from(raw, 'base64');
++            if (!buf.length) { sendJson({ ok: false, error: '图片是空的' }, 400); return; }
++            if (buf.length > 900_000) { sendJson({ ok: false, error: '图片太大了（压缩后最多约 900KB）' }, 413); return; }
++            const accepted = acceptImageBuffer(buf, 'App 图片');
++            if (!accepted) { sendJson({ ok: false, error: '这不是有效的图片（只支持 jpg/png/webp/gif）' }, 400); return; }
++            imageParts = [{
++              type: 'image',
++              mediaType: accepted.mimeType || 'image/jpeg',
++              data: accepted.buffer.toString('base64'),
++              name: String(body.image.name ?? 'app-image').slice(0, 60) || 'app-image',
++            }];
++            imageNote = '（主人还附了一张图片，请看着图回）';
++          }
++          const text = redactKnownTokensOnly(String(body.text ?? '').trim()) || (imageParts.length ? '（发来一张图片）' : '');
+           if (!text) { sendJson({ ok: false, error: '说点什么吧' }, 400); return; }
+           if (text.length > 2000) { sendJson({ ok: false, error: `手机端一句话别超过 2000 字（现在 ${text.length} 字）` }, 400); return; }
+           if (SENSITIVE_RE.test(text)) { sendJson({ ok: false, error: '内容含敏感信息，已阻止' }, 403); return; }
+@@ -9589,7 +9606,7 @@ async function main() {
+           }
+           const promptText = [
+             '【手机 App 转来的话】',
+-            `主人现在在手机 App 里对你说：「${text}」`,
++            `主人现在在手机 App 里对你说：「${text}」${imageNote}`,
+             '这一轮不是 QQ 消息；像平时一样直接回一到两句话就好，不要等我，也不要用 [SILENT]。',
+             '这一轮的文字会自动送到手机 App；不要调用任何 QQ 发送工具（qq_send_message / qq_send_group_message / qq_reply / qq_send_burst / qq_send_sticker / qq_send_poke / qq_send_voice）。',
+             '不要提 App、桥接、系统这些词；把这句话当成我们平常聊天的一部分。',
+@@ -9601,7 +9618,7 @@ async function main() {
+               resolve({ ok: false, error: '等她的回复超时了（她可能卡在别的回合里）' });
+             }, 145000);
+             petAskWaiters.set(key, { sessionId, timer, resolve });
+-            deliverPrompt(key, promptText).then((result) => {
++            deliverPrompt(key, promptText, { imageParts }).then((result) => {
+               if (result && result.queued) {
+                 clearTimeout(timer);
+                 petAskWaiters.delete(key);
+@@ -9627,7 +9644,7 @@ async function main() {
+               direct: true,
+               conversationKey: key,
+               tags: ['app'],
+-              text,
++              text: imageParts.length ? `（附图片）${text}` : text,
+             });
+             if (String(reply.text ?? '').trim()) {
+               appendMemoryInboxEvent(MEMORY_CARD_PATHS, {
+@@ -13606,10 +13623,14 @@ async function main() {
+         });
+       } catch {}
+     }
+-    let content = [{ type: 'text', text: withAlignmentContext(key, withSlangContext(promptText)) }];
+-    if (Array.isArray(opts.media) && opts.media.length > 0) {
++    const textPart = { type: 'text', text: withAlignmentContext(key, withSlangContext(promptText)) };
++    let content = [textPart];
++    if (Array.isArray(opts.imageParts) && opts.imageParts.length > 0) {
++      // 手机 App 上传的图片：网关已经校验/编码，直接作为 image part 交给 DSH。
++      content = [textPart, ...opts.imageParts];
++    } else if (Array.isArray(opts.media) && opts.media.length > 0) {
+       const imageParts = await resolveMediaList(opts.media);
+-      content = [{ type: 'text', text: withAlignmentContext(key, withSlangContext(promptText)) }, ...imageParts];
++      content = [textPart, ...imageParts];
+     }
+     // 媒体解析成功后再标记退场，避免解析异常时残留退场标记。
+     if (!isCurrentSession(key, sessionId)) throw new Error('投递前会话已重置或权限已变化');
