@@ -82,6 +82,17 @@ async function main() {
   if (process.env.ACTION === 'stickers') {
     await send('Runtime.evaluate', { expression: "document.getElementById('stickerBtn').click()" });
     await sleep(1200);
+  } else if (process.env.ACTION === 'voice') {
+    await send('Runtime.evaluate', {
+      expression: `(() => {
+        document.querySelectorAll('#voiceInputBtn,.speak-btn').forEach((el) => {
+          el.style.setProperty('outline', '4px solid #ff3b30', 'important');
+          el.style.setProperty('outline-offset', '4px', 'important');
+          el.style.setProperty('box-shadow', '0 0 0 7px rgba(255,59,48,.22)', 'important');
+        });
+      })()`,
+    });
+    await sleep(500);
   } else if (process.env.ACTION === 'sidebar') {
     await send('Runtime.evaluate', { expression: "document.getElementById('backBtn').click()" });
     await sleep(700);
@@ -102,7 +113,11 @@ async function main() {
     await send('Runtime.evaluate', { expression: "document.getElementById('backBtn').click()" });
     await sleep(600);
     await send('Runtime.evaluate', { expression: "document.getElementById('sidebarLibrary').click()" });
-    await sleep(1600);
+    await sleep(1200);
+    await send('Runtime.evaluate', {
+      expression: "const n=document.getElementById('libraryNote'); if(n) n.textContent='存储位置：data/library';",
+    });
+    await sleep(400);
   } else if (process.env.ACTION === 'history') {
     await send('Runtime.evaluate', { expression: "document.getElementById('backBtn').click()" });
     await sleep(600);
