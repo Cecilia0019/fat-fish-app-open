@@ -8,7 +8,7 @@
 - 个人固定 Tunnel 配置、域名、Tunnel 名称、证书路径和守护脚本 → 全部移除；只保留通用 Quick Tunnel 脚本；
 - 个人绝对路径、用户目录、DSH 凭据路径、桥接令牌路径 → 改为环境变量/`data/bridge-token.txt`；
 - 个人 DeepSeek 余额凭据路径 → 改为可选 `DEEPSEEK_GRANT_FILE`，不配置就不启用余额；
-- 私有仓、私有 Release、私有版本页的链接 → 删除或改写为本仓库/通用说明；
+- 原项目的仓库、Release、版本页链接 → 删除或改写为本仓库/通用说明；
 - Android 包名中的个人标识 → `com.fatfish.app`；版本改为 `z0.1.0`；
 - 个人昵称硬编码 → `FISH_NAME` 环境变量，默认“大肥鱼”。
 
