@@ -356,7 +356,7 @@ function render() {
       <div class="empty-state">
         <div class="empty-icon"><img src="/fish-cover.png" alt="" /></div>
         <h2>换了一扇门，还是她</h2>
-        <p>你在这里说的话，会进到我们在 QQ 的同一段对话里。<br />她的人格、记忆都在电脑那边，换手机也不会丢。</p>
+        <p>你在这里说的话，会进到你在 DSH 里的同一段对话里。<br />人格、记忆都在你自己的服务器上，换手机也不会丢。</p>
       </div>`;
     return;
   }
@@ -528,7 +528,7 @@ async function submit(text, options = {}) {
     hideError();
     if (media) clearPendingMedia();
     if (data.sentByTool) {
-      toast('她好像顺手在 QQ 也回了一句；如果不想这样，下次把话说得更“只在这里聊”。');
+      toast('她好像顺手在桥接那边也回了一句；如果不想这样，下次把话说得更“只在这里聊”。');
     }
   } catch (error) {
     const failed = state.messages.find((m) => m.clientId === clientId);
