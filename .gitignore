@@ -1,6 +1,6 @@
 data/
 bin/*
 !bin/README.md
-dist/
+dist*/
 node_modules/
 *.log

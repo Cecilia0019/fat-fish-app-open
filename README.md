@@ -8,8 +8,8 @@
 
 ## 下载
 
-- Release：<https://github.com/Cecilia0019/fat-fish-app-open/releases/tag/z0.1.0>
-- APK：<https://github.com/Cecilia0019/fat-fish-app-open/releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk>
+- Release：[releases/tag/z0.1.0](releases/tag/z0.1.0)
+- APK：[releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk](releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk)
 - 源码：本仓库 `main` / tag `z0.1.0`
 
 ## 它是什么
