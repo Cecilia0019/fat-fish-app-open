@@ -8,8 +8,8 @@
 
 ## 下载
 
-- Release：[releases/tag/z0.1.0](releases/tag/z0.1.0)
-- APK：[releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk](releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk)
+- Release：本仓库 **Releases → z0.1.0**
+- APK：`fat-fish-app-open-z0.1.0-debug.apk`
 - 源码：本仓库 `main` / tag `z0.1.0`
 
 ## 它是什么
