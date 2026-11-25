@@ -4,6 +4,12 @@
 
 > 截图均来自本地演示数据，不含真实账号、令牌、域名或聊天记录。
 
+## 下载
+
+- Release 页：本仓库 **Releases → z0.1.0**
+- APK：`fat-fish-app-open-z0.1.0-debug.apk`
+- 源码：本仓库 `main` / tag `z0.1.0`
+
 ## 快速开始
 
 1. 电脑安装 **Node.js >= 22**（语音还需要 `ffmpeg`）；
