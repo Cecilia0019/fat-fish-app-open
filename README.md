@@ -6,6 +6,12 @@
 
 这是 **第四版的公开清洗快照**，重新命名为 **z0.1.0**。
 
+## 下载
+
+- Release：<https://github.com/Cecilia0019/fat-fish-app-open/releases/tag/z0.1.0>
+- APK：<https://github.com/Cecilia0019/fat-fish-app-open/releases/download/z0.1.0/fat-fish-app-open-z0.1.0-debug.apk>
+- 源码：本仓库 `main` / tag `z0.1.0`
+
 ## 它是什么
 
 - 手机网页 / PWA / Android WebView App；
